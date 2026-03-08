@@ -50,6 +50,19 @@ app.post('/todos', async (req, res) => {
   }
 });
 
+
+app.delete("/todos/:elem", async (req, res) => {
+  try {
+    console.log("req.id:", req.params.elem);
+    const result = await pool.query(`DELETE FROM todos where id = ${req.params.elem}`)
+    res.json(result.rows);
+  } catch (err) {
+    console.log("error");
+    res.status(500).json({ error: 'Failed to delete' })
+  }
+});
+
+
 app.listen(PORT, () => {
   console.log('Server running on http://localhost:' + PORT);
 });

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(psql --version)",
+      "Bash(brew services list)",
+      "Bash(psql -d myproject -c \"SELECT * FROM todos;\")",
+      "Bash(psql -d myproject -c \"SELECT * FROM todos ORDER BY id DESC;\")"
+    ]
+  }
+}
