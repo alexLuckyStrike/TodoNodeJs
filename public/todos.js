@@ -1,0 +1,59 @@
+async function loadTodos() {
+  const res = await fetch('/todos');
+  const todos = await res.json();
+
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  todos.forEach((t) => {
+    const li = document.createElement('li');
+    li.textContent = t.title + ' — ' + t.due_date;
+
+    const btn = document.createElement('button');
+    btn.textContent = 'Delete';
+    btn.dataset.id = t.id;
+    btn.onclick = async () => {
+      await deleteElementFromTodo(t.id);
+      await loadTodos();
+    };
+
+    li.appendChild(btn);
+    list.appendChild(li);
+  });
+}
+
+async function deleteElementFromTodo(id) {
+  try {
+    const response = await fetch(`/todos/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (!response.ok) {
+      console.log('Delete failed:', response.status);
+      return;
+    }
+
+    const data = await response.json();
+    console.log('data:', data);
+  } catch (error) {
+    console.log('error:', error);
+  }
+}
+
+async function addTodo() {
+  const title = document.getElementById('title').value;
+  const date = document.getElementById('date').value;
+  const dueDate = date || null;
+
+  const res = await fetch('/todos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, due_date: dueDate })
+  });
+  if (!res.ok) return;
+
+  await loadTodos();
+}
+
+const addButton = document.getElementById('add-todo-button');
+addButton.addEventListener('click', addTodo);
+loadTodos();
