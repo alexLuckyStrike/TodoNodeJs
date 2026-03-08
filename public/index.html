@@ -33,12 +33,14 @@
     async function addTodo() {
       const title = document.getElementById('title').value;
       const date = document.getElementById('date').value;
+      const dueDate = date || null;
 
-      await fetch('/todos', {
+      const res = await fetch('/todos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, due_date: date })
+        body: JSON.stringify({ title, due_date: dueDate })
       });
+      if (!res.ok) return;
 
       loadTodos();
     }
