@@ -1,53 +1,43 @@
-const { getAllTodos, insertTodo, deleteTodoById } = require('../models/todoModel');
+const {
+  listTodos,
+  createTodo: createTodoService,
+  removeTodoById,
+  ServiceError
+} = require('../services/todoService');
+
+function handleControllerError(res, err, logMessage, fallbackMessage) {
+  if (err instanceof ServiceError) {
+    return res.status(err.statusCode).json({ error: err.message });
+  }
+
+  console.error(logMessage, err.message);
+  return res.status(500).json({ error: fallbackMessage });
+}
 
 async function getTodos(req, res) {
   try {
-    const todos = await getAllTodos();
+    const todos = await listTodos();
     res.json(todos);
   } catch (err) {
-    console.error('Failed to fetch todos:', err.message);
-    res.status(500).json({ error: 'Failed to fetch todos' });
+    return handleControllerError(res, err, 'Failed to fetch todos:', 'Failed to fetch todos');
   }
 }
 
 async function createTodo(req, res) {
   try {
-    const title = typeof req.body?.title === 'string' ? req.body.title.trim() : '';
-    const dueDateInput = req.body?.due_date;
-
-    if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
-    }
-
-    const dueDate = dueDateInput === '' || dueDateInput == null ? null : dueDateInput;
-    if (dueDate !== null && !/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) {
-      return res.status(400).json({ error: 'Invalid due_date format. Use YYYY-MM-DD' });
-    }
-
-    const todo = await insertTodo(title, dueDate);
+    const todo = await createTodoService(req.body?.title, req.body?.due_date);
     res.json(todo);
   } catch (err) {
-    console.error('Failed to create todo:', err.message);
-    res.status(500).json({ error: 'Failed to create todo' });
+    return handleControllerError(res, err, 'Failed to create todo:', 'Failed to create todo');
   }
 }
 
 async function deleteTodo(req, res) {
   try {
-    const id = Number(req.params.elem);
-    if (!Number.isInteger(id)) {
-      return res.status(400).json({ error: 'Invalid id' });
-    }
-
-    const result = await deleteTodoById(id);
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Todo not found' });
-    }
-
-    res.json(result.rows[0]);
+    const deletedTodo = await removeTodoById(req.params.id);
+    res.json(deletedTodo);
   } catch (err) {
-    console.error('Failed to delete todo:', err.message);
-    res.status(500).json({ error: 'Failed to delete' });
+    return handleControllerError(res, err, 'Failed to delete todo:', 'Failed to delete');
   }
 }
 

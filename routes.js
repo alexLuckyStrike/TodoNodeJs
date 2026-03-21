@@ -9,6 +9,6 @@ const router = express.Router();
 
 router.get('/todos', getTodos);
 router.post('/todos', createTodo);
-router.delete('/todos/:elem', deleteTodo);
+router.delete('/todos/:id', deleteTodo);
 
 module.exports = router;
